@@ -3,6 +3,7 @@ gfwl-stripper
 
 Tool to remove GFWL header from savegames (originally, Batman games)
 
+Version 1.0
 
 Instructions:
 
