@@ -196,9 +196,7 @@ void MainWindow::detectSavePath()
     foreach(QString path, game.getPathInPublicData())
       possiblepaths.push_back(QDir::toNativeSeparators(publicdatapath + path));
 
-  //ui->statusBar->showMessage(QString::number(possiblepaths.size()));
-  //ui->statusBar->showMessage(possiblepaths[1]);
-
+  // We check in each possible path until we find a save
   for(int i=0; i<possiblepaths.size() && found<1; ++i)
   {
     QDir folder(possiblepaths[i]);
@@ -231,30 +229,31 @@ void MainWindow::detectSavePath()
 
   ui->filename_lineEdit->setText(QDir::toNativeSeparators(detectedpath));
   ui->statusBar->showMessage(QString("Detected files: ") + QString::number(found));
-  selectFolder(detectedpath);
+  savepath=detectedpath;
+
+  // If the savepath is not empty
+  if(!savepath.isEmpty())
+    ui->start_button->setEnabled(true);
 }
 
-void MainWindow::selectFolder(const QString & path)
+void MainWindow::selectFolder()
 {
-  if(path.isEmpty())
+  QString currentpath = ui->filename_lineEdit->text();
+  QString tmppath = QDir::toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("Choose savegame directory"),currentpath));
+
+  // If user did not press "Cancel", we get the value
+  if(!tmppath.isEmpty())
   {
-    QString currentpath = ui->filename_lineEdit->text();
-    savepath = QDir::toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("Choose savegame directory"),currentpath));
-    if(savepath != 0)
-    {
-      ui->filename_lineEdit->setText(savepath);
-      ui->start_button->setEnabled(true);
-      ui->statusBar->clearMessage();
-    }
-    else
-    {
-      ui->start_button->setEnabled(false);
-    }
-  }
-  else
-  {
-    savepath = path;
+    savepath = tmppath;
+    ui->filename_lineEdit->setText(savepath);
     ui->start_button->setEnabled(true);
+    ui->statusBar->clearMessage();
+  }
+
+  // If the savepath is empty
+  if(savepath.isEmpty())
+  {
+    ui->start_button->setEnabled(false);
   }
 }
 

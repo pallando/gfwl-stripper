@@ -25,7 +25,7 @@ private:
 
 private slots:
     void selectGame(int selected_game) { gameidx = selected_game; detectSavePath(); }
-    void selectFolder(const QString & path=QString());
+    void selectFolder();
     void processFolder();
 
 private:
