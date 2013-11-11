@@ -6,8 +6,13 @@
 #include <QStandardPaths>
 #include <QProcessEnvironment>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
+#include <iomanip>
 using namespace std;
+
+// Block size (area around offset to search for hex string)
+#define BLOCKSIZE 63
 
 // Macro to manage mkdir call (Windows vs Unix)
 #ifdef _WIN32
@@ -51,6 +56,7 @@ void MainWindow::readSettings()
     newgame.setAppid(settings.value("app","0").toString());
     newgame.setExtension(settings.value("extension").toString());
     newgame.setOffset(settings.value("offset").toString());
+    newgame.setHexstring(settings.value("hexstring").toString().toUpper());
 
     // Get possible paths to the savegames
     QStringList steamcloud = settings.value("steamcloud").toStringList();
@@ -196,9 +202,6 @@ void MainWindow::detectSavePath()
     foreach(QString path, game.getPathInPublicData())
       possiblepaths.push_back(QDir::toNativeSeparators(publicdatapath + path));
 
-  //ui->statusBar->showMessage(QString::number(possiblepaths.size()));
-  //ui->statusBar->showMessage(possiblepaths[1]);
-
   for(int i=0; i<possiblepaths.size() && found<1; ++i)
   {
     QDir folder(possiblepaths[i]);
@@ -290,7 +293,46 @@ void MainWindow::processFolder()
 
             if (input_file.is_open() && output_file.is_open())
             {
-              input_file.seekg(game.getOffset());
+              // We try to find the hex string around "offset"
+              int firsthalf = (BLOCKSIZE+1)/2;
+              char memblock[BLOCKSIZE];
+              input_file.seekg(game.getOffset()-firsthalf);
+              input_file.read(memblock,BLOCKSIZE);
+
+              ostringstream oss;
+              for (int block = 0; block < BLOCKSIZE; ++block)
+              {
+                int z = memblock[block]&0xff;
+                oss << hex << setfill('0') << setw(2) << uppercase << z;
+              }
+              QString filehexstring = QString::fromStdString(oss.str());
+              int hexpos = filehexstring.indexOf(game.getHexstring());
+
+              // If we found the string, we cut where it starts
+              if(hexpos != -1)
+                input_file.seekg(game.getOffset()-firsthalf+hexpos/2);
+              // Otherwise, we use the default offset
+              else
+              {
+                // We try to look for the hex string around the start
+                input_file.seekg(0);
+                input_file.read(memblock,BLOCKSIZE);
+
+                ostringstream oss2;
+                for (int block = 0; block < BLOCKSIZE; ++block)
+                {
+                  int z = memblock[block]&0xff;
+                  oss2 << hex << setfill('0') << setw(2) << uppercase << z;
+                }
+                filehexstring = QString::fromStdString(oss2.str());
+                hexpos = filehexstring.indexOf(game.getHexstring());
+
+                if(hexpos != -1)
+                  input_file.seekg(hexpos/2);
+                else
+                  input_file.seekg(game.getOffset());
+              }
+
               output_file << input_file.rdbuf();
               output_file.close();
               input_file.close();
