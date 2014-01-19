@@ -49,6 +49,7 @@ void MainWindow::readSettings()
 
     // AppID, savegames extension and offset to strip header
     newgame.setAppid(settings.value("app","0").toString());
+    newgame.setSavename(settings.value("savename").toString());
     newgame.setExtension(settings.value("extension").toString());
     newgame.setOffset(settings.value("offset").toString());
 
@@ -264,7 +265,6 @@ void MainWindow::processFolder()
   QDir savefolder(savepath);
   GameFWL game = games[gameidx];
   int processed = 0;
-  int copied = 0;
 
   QString appid = game.getAppid();
   QString outputfolder = appid + QDir::separator() + "remote" + QDir::separator();
@@ -282,8 +282,19 @@ void MainWindow::processFolder()
           int mkd2 = MKDIR(outputfolder.toStdString().c_str());
           if(mkd2 == 0 || errno == EEXIST)
           {
+            QString newname = files[i].fileName();
+            if(!game.getSavename().isEmpty())
+            {
+              if(~newname.startsWith(game.getSavename(),Qt::CaseInsensitive))
+              {
+                int ind = newname.indexOf(game.getSavename(),0,Qt::CaseInsensitive);
+                if(ind != -1)
+                  newname = newname.remove(0,ind);
+              }
+            }
+
             QString savefile = files[i].canonicalFilePath();
-            QString newsavefile = outputfolder + files[i].fileName();
+            QString newsavefile = outputfolder + newname;
 
             ifstream input_file(savefile.toStdString().c_str(),ios::binary);
             ofstream output_file(newsavefile.toStdString().c_str(),ios::binary);
@@ -299,22 +310,8 @@ void MainWindow::processFolder()
           }
         }
       }
-      else
-      {
-        int mkd1 = MKDIR(appid.toStdString().c_str());
-        if(mkd1 == 0 || errno == EEXIST)
-        {
-          int mkd2 = MKDIR(outputfolder.toStdString().c_str());
-          if(mkd2 == 0 || errno == EEXIST)
-          {
-            QString destfile = outputfolder + files[i].fileName();
-            QFile::copy(files[i].canonicalFilePath(),destfile);
-            ++copied;
-          }
-        }
-      }
     }
   }
-  message = "Processed " + QString::number(processed) + " file(s) & copied " + QString::number(copied) + " file(s) into " + appid + ".";
+  message = "Processed " + QString::number(processed) + " file(s) into " + appid + ".";
   ui->statusBar->showMessage(message);
 }

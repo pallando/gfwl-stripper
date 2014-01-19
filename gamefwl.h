@@ -18,6 +18,9 @@ class GameFWL
     QString getAppid() const;
     void setAppid(const QString & value);
 
+    QString getSavename() const;
+    void setSavename(const QString &value);
+
     QString getExtension() const;
     void setExtension(const QString & value);
 
@@ -48,6 +51,7 @@ class GameFWL
   private:
     QString     name;
     QString     appid;
+    QString     savename;
     QString     extension;
     int         offset;
     QStringList pathInSteamCloud;

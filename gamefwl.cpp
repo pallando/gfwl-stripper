@@ -22,6 +22,15 @@ void GameFWL::setAppid(const QString & value)
   appid = value;
 }
 
+QString GameFWL::getSavename() const
+{
+  return savename;
+}
+void GameFWL::setSavename(const QString &value)
+{
+  savename = value;
+}
+
 QString GameFWL::getExtension() const
 {
   return extension;
@@ -94,14 +103,15 @@ void GameFWL::setPathInPublicData(const QStringList & value)
   pathInPublicData = value;
 }
 
+
 int GameFWL::getOffset() const
 {
-    return offset;
+  return offset;
 }
 void GameFWL::setOffset(const QString & value)
 {
-    bool ok;
-    offset = value.toInt(&ok,16);
+  bool ok;
+  offset = value.toInt(&ok,16);
   if(!ok)
     offset = 0;
 }
