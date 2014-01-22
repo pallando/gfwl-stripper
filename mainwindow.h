@@ -22,6 +22,9 @@ private:
     void readSettings();
     void detectPaths();
     void detectSavePath();
+    void detectSteamUsers();
+    QString getPersona(QString uid);
+    int copyToSteam();
 
 private slots:
     void selectGame(int selected_game) { gameidx = selected_game; detectSavePath(); }
@@ -39,6 +42,7 @@ private:
     QString publicpath;     // QProcessEnvironment::systemEnvironment(); %PUBLIC%
     QString publicdatapath; // GenericDataLocation: 1
     QString savepath;
+    QStringList uids;
 };
 
 #endif // MAINWINDOW_H

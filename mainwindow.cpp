@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QDir>
+#include <QTextStream>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QProcessEnvironment>
@@ -25,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     readSettings();
     detectPaths();
+    detectSteamUsers();
     selectGame(0);
 }
 
@@ -197,9 +199,6 @@ void MainWindow::detectSavePath()
     foreach(QString path, game.getPathInPublicData())
       possiblepaths.push_back(QDir::toNativeSeparators(publicdatapath + path));
 
-  //ui->statusBar->showMessage(QString::number(possiblepaths.size()));
-  //ui->statusBar->showMessage(possiblepaths[1]);
-
   for(int i=0; i<possiblepaths.size() && found<1; ++i)
   {
     QDir folder(possiblepaths[i]);
@@ -234,6 +233,117 @@ void MainWindow::detectSavePath()
   ui->statusBar->showMessage(QString("Detected files: ") + QString::number(found));
   selectFolder(detectedpath);
 }
+
+void MainWindow::detectSteamUsers()
+{
+  if(!steampath.isEmpty())
+  {
+    // List to display
+    QStringList display;
+
+    // Path to Steam Cloud
+    QString steamcloudpath = steampath + QString("userdata") + QDir::separator();
+
+    // We look in each Steam user folder
+    QDir userdata(steamcloudpath);
+    QFileInfoList steamuids = userdata.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time);
+    for(int i=0; i<steamuids.size(); ++i)
+    {
+      QString uid = QDir::toNativeSeparators(steamuids[i].baseName());
+      QString user = getPersona(uid);
+      display.push_back(uid + QString(" (") + user + QString(")"));
+      uids.push_back(uid);
+    }
+    ui->dest_selection->addItems(display);
+  }
+  else
+  {
+    uids.clear();
+    ui->dest_selection->setDisabled(true);
+    ui->dest_label->setText(QString("Steam not found."));
+  }
+}
+
+
+QString MainWindow::getPersona(QString uid)
+{
+  QString res;
+  if(!steampath.isEmpty())
+  {
+    QString steamcloudpath = steampath + QString("userdata") + QDir::separator();
+    QString localconfig = steamcloudpath + uid + QDir::separator() + QString("config") + QDir::separator() + "localconfig.vdf";
+
+    ifstream file(localconfig.toStdString().c_str());
+    string line;
+    if(file.is_open())
+    {
+      while(getline(file,line) && res.isEmpty())
+      {
+        QString qline = QString::fromStdString(line);
+        if(qline.contains("PersonaName"))
+          res = qline.replace("\"PersonaName\"","").replace("\t","").replace('"',"");
+      }
+      file.close();
+    }
+  }
+  return res;
+}
+
+
+int MainWindow::copyToSteam()
+{
+  int nbcopied = 0;
+
+  // If we've found SteamIDs
+  if(!uids.isEmpty())
+  {
+    GameFWL game = games[gameidx];
+    QString appid = game.getAppid();
+    QString steamuid = uids[ui->dest_selection->currentIndex()];
+    QChar sep = QDir::separator();
+
+    QString steamcloudappid = steampath + QString("userdata") + sep + steamuid + sep + appid + sep;
+    QString steamcloudbackup = documentspath + appid + ".bak";
+
+    // Check if directory already exists
+    bool backup = false;
+    QDir dir(steamcloudappid);
+    if(dir.exists())
+    {
+      // Old saves backup
+      if(dir.rename(steamcloudappid,steamcloudbackup))
+        backup = true;
+    }
+    else
+      backup = true;
+
+    // Copy patched files to Steam if previous folder has been backed up
+    if(backup)
+    {
+      int mkd1 = MKDIR(steamcloudappid.toStdString().c_str());
+      if(mkd1 == 0 || errno == EEXIST)
+      {
+        QString remotefolder = steamcloudappid + QString("remote") + sep;
+        int mkd2 = MKDIR(remotefolder.toStdString().c_str());
+
+        if(mkd2 == 0 || errno == EEXIST)
+        {
+          QDir outputfolder = QDir(appid + QDir::separator() + "remote" + QDir::separator());
+          QFileInfoList files = outputfolder.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
+          foreach(QFileInfo file, files)
+          {
+            QFile tmp(file.canonicalFilePath());
+            QString newfile = remotefolder + file.fileName();
+            if(tmp.copy(newfile))
+              ++nbcopied;
+          }
+        }
+      }
+    }
+  }
+  return nbcopied;
+}
+
 
 void MainWindow::selectFolder(const QString & path)
 {
@@ -312,6 +422,9 @@ void MainWindow::processFolder()
       }
     }
   }
-  message = "Processed " + QString::number(processed) + " file(s) into " + appid + ".";
+  message = "Processed " + QString::number(processed) + " file(s) into " + appid + ". ";
+  int nbcopied = copyToSteam();
+  if(nbcopied > 0)
+    message = message + QString::number(nbcopied) + " files copied to Steam. ";
   ui->statusBar->showMessage(message);
 }
