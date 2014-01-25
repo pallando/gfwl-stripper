@@ -231,6 +231,11 @@ void MainWindow::detectSavePath()
 
   ui->filename_lineEdit->setText(QDir::toNativeSeparators(detectedpath));
   ui->statusBar->showMessage(QString("Detected files: ") + QString::number(found));
+
+  // We set detectedpath to "Not found." to avoid asking automatically the user the path when the tool starts.
+  if(detectedpath.isEmpty())
+    detectedpath = "Not found.";
+
   selectFolder(detectedpath);
 }
 
@@ -303,16 +308,25 @@ int MainWindow::copyToSteam()
     QChar sep = QDir::separator();
 
     QString steamcloudappid = steampath + QString("userdata") + sep + steamuid + sep + appid + sep;
-    QString steamcloudbackup = documentspath + appid + ".bak";
+    QString steamcloudbackup = documentspath + "backup." + appid;
+
+    // We check how many backups exist and name the next one accordingly.
+    QDir dir(steamcloudbackup);
+    int nbbak = 0;
+    while(dir.exists())
+    {
+      ++nbbak;
+      dir.setPath(steamcloudbackup + QString(".") + QString::number(nbbak));
+    }
+    steamcloudbackup = dir.absolutePath();
 
     // Check if directory already exists
     bool backup = false;
-    QDir dir(steamcloudappid);
+    dir.setPath(steamcloudappid);
     if(dir.exists())
     {
       // Old saves backup
-      if(dir.rename(steamcloudappid,steamcloudbackup))
-        backup = true;
+      backup = dir.rename(steamcloudappid,steamcloudbackup);
     }
     else
       backup = true;
@@ -364,8 +378,16 @@ void MainWindow::selectFolder(const QString & path)
   }
   else
   {
-    savepath = path;
-    ui->start_button->setEnabled(true);
+    // We do nothing if the path was not found automatically.
+    if(path.compare(QString("Not found."),Qt::CaseInsensitive) != 0)
+    {
+      savepath = path;
+      ui->start_button->setEnabled(true);
+    }
+    else
+    {
+      ui->start_button->setEnabled(false);
+    }
   }
 }
 
