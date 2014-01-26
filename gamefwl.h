@@ -48,11 +48,15 @@ class GameFWL
     QStringList getPathInPublicData() const;
     void setPathInPublicData(const QStringList & value);
 
+    QString getHexstring() const;
+    void setHexstring(const QString &value);
+
   private:
     QString     name;
     QString     appid;
     QString     savename;
     QString     extension;
+    QString     hexstring;
     int         offset;
     QStringList pathInSteamCloud;
     QStringList pathInSteamApps;

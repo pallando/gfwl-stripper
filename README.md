@@ -3,26 +3,19 @@ gfwl-stripper
 
 Tool to remove GFWL header from savegames (originally, Batman games)
 
-Version 1.3
+Version 1.5
 
 Instructions:
 
-- Unzip the folder somewhere, open it and start GFWL-Stripper.
-
-- Select your game.
-- Check if the detected folder corresponds to where your old GFWL-savegames are.
-    If it doesn't, click "browse" and select the correct folder.
-
-- Click start.
-
-- Return into the GFWL-stripper folder, there should be a directory with the same number as the GOTY edition of your game (e.g. 35140 or 200260).
-
-- Browse to your "steam cloud" data:
-    e.g.: C:\Program Files(x86)\Steam\userdata\<userid>\
-
-- Backup the folder with your game ID:
-    e.g.: 35140 for AA:GOTY or 200260 for AC:GOTY
-
-- Replace the directory you just backed up by the one in the GFWL-stripper folder and overwrite everything.
-
+- Unzip "GFWL-stripper" and run the program.
+- Select the game.
+- Check if the detected folder contains the saves you want to patch.
+- Choose the Steam account you want to copy your saves to.
+- Click "start".
 - Play your game.
+
+
+Information:
+- Your patched saves should be copied to Steam automatically..
+- If a folder was already present in Steam\userdata, it is moved to "documents" (name: backup.appid).
+- If you need to put manually your files in Steam, you can find the patched saves in the GFWL-stripper directory (in subfolders).

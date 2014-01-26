@@ -103,6 +103,14 @@ void GameFWL::setPathInPublicData(const QStringList & value)
   pathInPublicData = value;
 }
 
+QString GameFWL::getHexstring() const
+{
+  return hexstring;
+}
+void GameFWL::setHexstring(const QString &value)
+{
+  hexstring = value;
+}
 
 int GameFWL::getOffset() const
 {
