@@ -343,13 +343,25 @@ int MainWindow::copyToSteam()
       int mkd1 = MKDIR(steamcloudappid.toStdString().c_str());
       if(mkd1 == 0 || errno == EEXIST)
       {
+        // Copy files in appid folder
+        QDir appidfolder = QDir(appid);
+        QFileInfoList files = appidfolder.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
+        foreach(QFileInfo file, files)
+        {
+          QFile tmp(file.canonicalFilePath());
+          QString newfile = steamcloudappid + file.fileName();
+          if(tmp.copy(newfile))
+            ++nbcopied;
+        }
+
+        // Copy remote folder
         QString remotefolder = steamcloudappid + QString("remote") + sep;
         int mkd2 = MKDIR(remotefolder.toStdString().c_str());
-
         if(mkd2 == 0 || errno == EEXIST)
         {
-          QDir outputfolder = QDir(appid + QDir::separator() + "remote" + QDir::separator());
-          QFileInfoList files = outputfolder.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
+          // Copy files in "remote" folder
+          QDir outputfolder = QDir(appid + sep + "remote" + sep);
+          files = outputfolder.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
           foreach(QFileInfo file, files)
           {
             QFile tmp(file.canonicalFilePath());
