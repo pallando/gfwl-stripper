@@ -1,0 +1,63 @@
+"200260"
+{
+	"profile.bin"
+	{
+		"root"		"0"
+		"size"		"81"
+		"localtime"		"1382118797"
+		"time"		"1382118797"
+		"remotetime"		"1382118797"
+		"sha"		"f7dc7306b9db13775a2bc0f292cb8ffbacb2d6c1"
+		"syncstate"		"1"
+		"persiststate"		"0"
+		"platformstosync2"		"-1"
+	}
+	"save0.sgd"
+	{
+		"root"		"0"
+		"size"		"294912"
+		"localtime"		"1391125363"
+		"time"		"1391125364"
+		"remotetime"		"1391125364"
+		"sha"		"be8e2759ae718154bab0ec60fb7152153b4d6ab7"
+		"syncstate"		"1"
+		"persiststate"		"0"
+		"platformstosync2"		"-1"
+	}
+	"save1.sgd"
+	{
+		"root"		"0"
+		"size"		"294912"
+		"localtime"		"1391125457"
+		"time"		"1391125458"
+		"remotetime"		"1391125458"
+		"sha"		"be8e2759ae718154bab0ec60fb7152153b4d6ab7"
+		"syncstate"		"1"
+		"persiststate"		"0"
+		"platformstosync2"		"-1"
+	}
+	"save2.sgd"
+	{
+		"root"		"0"
+		"size"		"294912"
+		"localtime"		"1391125464"
+		"time"		"1391125465"
+		"remotetime"		"1391125465"
+		"sha"		"c683dbe8fc3970b584c45fa1f88e65c9e87c44ca"
+		"syncstate"		"1"
+		"persiststate"		"0"
+		"platformstosync2"		"-1"
+	}
+	"save3.sgd"
+	{
+		"root"		"0"
+		"size"		"294912"
+		"localtime"		"1391125478"
+		"time"		"1391125479"
+		"remotetime"		"1391125479"
+		"sha"		"9b320695e5fe7a51cb6378d1c772f12b8d580282"
+		"syncstate"		"1"
+		"persiststate"		"0"
+		"platformstosync2"		"-1"
+	}
+}
